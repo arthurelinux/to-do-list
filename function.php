@@ -51,6 +51,16 @@ function reabrirTask($taskId) {
     return $stmt->execute();
 }
 
+function updateTask($taskId, $tarefa) {
+    global $conn;
+    $stmt = $conn->prepare("UPDATE tarefas SET tarefa = ? WHERE id = ?");
+    if ($stmt === false) {
+        die('Prepare failed: ' . htmlspecialchars($conn->error));
+    }
+    $stmt->bind_param("si", $tarefa, $taskId);
+    return $stmt->execute();
+}
+
 function deleteTask($taskId) {
     global $conn;
     $stmt = $conn->prepare("DELETE FROM tarefas WHERE id = ?");
@@ -60,4 +70,6 @@ function deleteTask($taskId) {
     $stmt->bind_param("i", $taskId);
     return $stmt->execute();
 }
+
+
 ?>

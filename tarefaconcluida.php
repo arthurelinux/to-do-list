@@ -59,7 +59,7 @@ $tasks = getTasksConcluidas();
             <h3 class="text-center">Adicionar Tarefa</h3>
             <form id="taskForm">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" id="tarafa" name="tarefa" placeholder="Nova tarefa">
+                    <input type="text" class="form-control" id="tarafa" name="tarefa" placeholder="Nova tarefa" required>
                     <button class="btn btn-primary" type="submit" id="add_task">Adicionar</button>
                 </div>
             </form>

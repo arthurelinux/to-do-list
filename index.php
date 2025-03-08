@@ -11,11 +11,13 @@ if (isset($_POST['add_task'])) {
 // Marcar como concluída ou excluir
 if (isset($_GET['action']) && isset($_GET['id'])) {
     $taskId = $_GET['id'];
+    $tarafa = $_GET['tarefa'];
+    var_dump($taskId, $tarafa);
     if ($_GET['action'] == 'complete') {
         completeTask($taskId);
     } elseif ($_GET['action'] == 'delete') {
         deleteTask($taskId);
-    }
+    } 
 }
 
 $tasks = getTasks();
@@ -60,7 +62,7 @@ $tasks = getTasks();
             <h3 class="text-center">Adicionar Tarefa</h3>
             <form id="taskForm">
                 <div class="input-group mb-3">
-                    <input type="text" class="form-control" id="tarafa" name="tarefa" placeholder="Nova tarefa">
+                    <input type="text" class="form-control" id="tarafa" name="tarefa" placeholder="Nova tarefa" required>
                     <button class="btn btn-primary" type="submit" id="add_task">Adicionar</button>
                 </div>
             </form>
@@ -70,6 +72,29 @@ $tasks = getTasks();
         </div>
     </div>
 </div>
+
+<!-- Modal Editar Tarefa -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-labelledby="editTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editTaskModalLabel">Editar Tarefa</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editTaskForm">
+                    <div class="mb-3">
+                        <label for="editTarafa" class="form-label">Tarefa</label>
+                        <input type="text" class="form-control" id="editTarafa" name="tarefa" required>
+                    </div>
+                    <input type="hidden" id="editTaskId">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 <script>
 $(document).ready(function() {
@@ -84,14 +109,36 @@ $(document).ready(function() {
                 var buttons = $('<div></div>');
                 var completeButton = $('<button class="btn btn-success btn-sm complete-task"><i class="fas fa-check"></i> Concluir</button>');
                 completeButton.data('id', task.id);
-                var deleteButton = $('<button class="btn btn-danger btn-sm delete-task"><i class="fas fa-trash"></i> Excluir</button>');
+                var deleteButton = $('<button class="btn btn-danger btn-sm delete-task"><i class="fas fa-trash"></i> Excluir </button>');
                 deleteButton.data('id', task.id);
-                buttons.append(completeButton).append(deleteButton);
+                var editButton = $('<button class="btn btn-warning btn-sm edit-task" data-bs-toggle="modal" data-bs-target="#editTaskModal"><i class="fas fa-edit"></i> Editar</button>');
+                editButton.data('id', task.id);
+                editButton.data('tarefa', task.tarefa);
+                buttons.append(completeButton).append(editButton).append(deleteButton);
                 taskItem.append(buttons);
                 taskList.append(taskItem);
             });
         });
     }
+
+    $(document).on('click', '.edit-task', function() {
+        var taskId = $(this).data('id');
+        var tarefa = $(this).data('tarefa');
+        $('#editTaskId').val(taskId);
+        $('#editTarafa').val(tarefa);
+    });
+
+    $('#editTaskForm').on('submit', function(e) {
+        e.preventDefault();
+        var taskId = $('#editTaskId').val();
+        var tarefa = $('#editTarafa').val();
+        $.post('tasks.php', { action: 'edit', id: taskId, tarefa: tarefa }, function(response) {
+            Swal.fire('Sucesso', 'Tarefa editada com sucesso!', 'success').then(() => {
+                $('#editTaskModal').modal('hide');
+                loadTasks();
+            });
+        });
+    });
 
     loadTasks();
 
@@ -105,6 +152,8 @@ $(document).ready(function() {
             });
         });
     });
+
+    
 
     $(document).on('click', '.complete-task', function() {
         var taskId = $(this).data('id');
