@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+ 
+  app:
+    build: .
+    container_name: php_app
+    restart: always
+    ports:
+      - "8083:80" 
+    volumes:
+      - ./:/var/www/html 
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: testephp
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306" 
+    volumes:
+      - mysql-data:/var/lib/mysql 
+      - ./banco.sql:/docker-entrypoint-initdb.d/banco.sql 
+    networks:
+      - app-network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "8084:80"
+    depends_on:
+      - db
+    networks:
+      - app-network
+
+volumes:
+  mysql-data:
+
+networks:
+  app-network:
+    driver: bridge
